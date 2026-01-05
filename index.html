@@ -1,35 +1,22 @@
 <!DOCTYPE html>
 <html lang="sv">
 <head>
-  <meta charset="UTF-8" />
-  <title>SL Realtidskarta</title>
+  <meta charset="UTF-8">
+  <title>SL Stopp på karta</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 
   <style>
-    html, body {
-      height: 100%;
-      margin: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    #map {
-      height: 100%;
-      width: 100%;
-    }
-
+    html, body { height: 100%; margin: 0; font-family: Arial; }
+    #map { height: 100%; width: 100%; }
     .header {
       position: absolute;
       top: 10px;
       left: 50%;
       transform: translateX(-50%);
       background: white;
-      padding: 8px 12px;
+      padding: 6px 12px;
       border-radius: 6px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.3);
       z-index: 1000;
@@ -38,25 +25,42 @@
 </head>
 <body>
 
-  <div class="header">
-    <strong>SL Realtidskarta</strong>
-  </div>
+<div class="header"><strong>Alla SL-stopp</strong></div>
+<div id="map"></div>
 
-  <div id="map"></div>
+<!-- Leaflet -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<!-- PapaParse för CSV -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+  // Initiera Leaflet-kartan
+  const map = L.map('map').setView([59.3293, 18.0686], 12);
 
-  <script>
-    // Initiera karta över Stockholm
-    const map = L.map('map').setView([59.3293, 18.0686], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
 
-    // OpenStreetMap tiles
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19,
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-  </script>
+  // Hämta stops.txt
+  fetch('data/stops.txt')
+    .then(res => res.text())
+    .then(csvText => {
+      const parsed = Papa.parse(csvText, {header: true});
+      parsed.data.forEach(stop => {
+        if (stop.stop_lat && stop.stop_lon) {  // hoppa över rader utan koordinater
+          L.circleMarker([parseFloat(stop.stop_lat), parseFloat(stop.stop_lon)], {
+            radius: 4,
+            color: 'red',
+            fillOpacity: 0.8
+          })
+          .bindPopup(`<strong>${stop.stop_name}</strong>`)
+          .addTo(map);
+        }
+      });
+    })
+    .catch(err => console.error("Fel vid läsning av stops.txt:", err));
+</script>
 
 </body>
 </html>
