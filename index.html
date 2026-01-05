@@ -43,7 +43,7 @@
   }).addTo(map);
 
   // Hämta stops.txt
-  fetch('data/stops.txt')
+  fetch('stops.txt')
     .then(res => res.text())
     .then(csvText => {
       const parsed = Papa.parse(csvText, {header: true});
