@@ -85,16 +85,6 @@ fetch('gps_one_snapshot.json')
         .addTo(map);
       }
     });
-
-    // Rita linje genom alla punkter (valfritt)
-    if (latlngs.length > 1) {
-      L.polyline(latlngs, {
-        color: 'blue',
-        weight: 2
-      }).addTo(map);
-
-      map.fitBounds(latlngs);
-    }
   })
   .catch(err => {
     console.error("Fel vid laddning av GPS-JSON:", err);
