@@ -60,6 +60,45 @@
       });
     })
     .catch(err => console.error("Fel vid läsning av stops.txt:", err));
+
+fetch('gps_one_snapshot.json')
+  .then(res => res.json())
+  .then(data => {
+    console.log("GPS-punkter:", data.length);
+
+    const latlngs = [];
+
+    data.forEach(p => {
+      if (p.lat && p.lon) {
+        const latlng = [p.lat, p.lon];
+        latlngs.push(latlng);
+
+        L.circleMarker(latlng, {
+          radius: 3,
+          color: 'blue',
+          fillOpacity: 0.7
+        })
+        .bindPopup(
+          `<b>Trip ID:</b> ${p.trip_id}<br>
+           <b>Tid:</b> ${new Date(p.timestamp * 1000).toLocaleTimeString()}`
+        )
+        .addTo(map);
+      }
+    });
+
+    // Rita linje genom alla punkter (valfritt)
+    if (latlngs.length > 1) {
+      L.polyline(latlngs, {
+        color: 'blue',
+        weight: 2
+      }).addTo(map);
+
+      map.fitBounds(latlngs);
+    }
+  })
+  .catch(err => {
+    console.error("Fel vid laddning av GPS-JSON:", err);
+  });
 </script>
 
 </body>
